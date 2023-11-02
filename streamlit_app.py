@@ -99,7 +99,6 @@ def generate_response(input_text):
     # Invoking the chain with a short story
     # story = """As part of the Alexa Prize SocialBot Grand Challenge 5 (SGC5), a team of Stevens Institute of Technology graduate students found success with a socialbot that aims to develop a most human concept: friendship. NAM, or Never Alone with Me, was recently announced as the second place overall winner of the international university challenge competition, which focused on creating an Alexa skill that easily and clearly chats with users on trending topics and news for 20 minutes. The team won a $50,000 prize."""
     # story = "Migrant workers sent home $1.98 billion in October, a four-month high, as banks stepped up efforts to woo more remittance buoyed by a relaxed central bank rule on incentive, a development that is expected to give some relief to a country reeling under the foreign exchange crisis."
-    st.info(llm(input_text))
     story = input_text
     article_and_statements = chain.invoke({"story": story})
 
