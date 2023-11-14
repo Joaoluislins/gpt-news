@@ -19,14 +19,14 @@ from langchain.schema.prompt_template import format_document
 from langchain.schema import Document
 
 class AIJournalist:
-    def __init__(self, openai_key, serper_api_key):
+    def __init__(self, openai_api_key, serper_api_key):
         
         # API keys
-        self.openai_key = openai_key
+        self.openai_api_key = openai_api_key
         self.serper_api_key = serper_api_key
 
         # LLM that is going to be used
-        self.llm = ChatOpenAI(temperature=0.2, model="gpt-4", openai_key = self.openai_key)
+        self.llm = ChatOpenAI(temperature=0.2, model="gpt-4", openai_api_key = self.openai_api_key)
 
         # Search engine
         self.search = GoogleSerperAPIWrapper()
@@ -44,7 +44,7 @@ class AIJournalist:
 
         
     def set_openai_key(self):
-        openai.api_key = self.openai_key
+        openai.api_key = self.openai_api_key
 
     def set_serper_api_key(self):
         os.environ["SERPER_API_KEY"] = self.serper_api_key
