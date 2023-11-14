@@ -17,6 +17,7 @@ from langchain.schema import StrOutputParser
 from langchain.callbacks.manager import trace_as_chain_group
 from langchain.schema.prompt_template import format_document
 from langchain.schema import Document
+import concurrent.futures
 
 class AIJournalist:
     def __init__(self, openai_api_key, serper_api_key):
@@ -116,18 +117,24 @@ class AIJournalist:
             """You are a factual checker for a digital newspaper. Given News Article and the Statement below, search on the internet and provide a very short review about the factualness of the statement. Use elements of the article to improve search results.
             News Article: {article}
             Statement: {statement}
-            Short Review:"""
-        )
+            Short Review:""")
 
-        # processing the str numbered list into a lst obj
+        # processing the str numbered list into a list obj
         statement_list = self.list_out_of_num_list(statement_list)
 
         statement_checker = factual_checker_prompt | {'result': self.agent_react}
-        
-        # for each statement, review and append in the list
-        reviews_list = []
-        for statement in statement_list:
-            reviews_list.append(self.chain_invoke(statement_checker, {'article': article, 'statement': statement}))
+
+        # Use concurrent.futures to make parallel calls
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+
+            # Create a list of futures for each statement
+            futures = [executor.submit(self.chain_invoke, statement_checker, {'article': article, 'statement': statement}) for statement in statement_list]
+
+            # Wait for all futures to complete
+            concurrent.futures.wait(futures)
+
+            # Get the results from completed futures
+            reviews_list = [future.result() for future in futures]
 
         return reviews_list
 
