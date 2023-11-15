@@ -1,25 +1,14 @@
-# 📦 Streamlit App Starter Kit 
+# 📦 Streamlit based AI news generator
 ```
-⬆️ (Replace above with your app's name)
 ```
 
-Description of the app ...
+This application is part of an ongoing PhD research. The main target is to create an application that can generate a trustworthy news article about either a theme or a given short story and adapt it accordingly to the user requests.
 
-## Demo App
+## Demo app
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://app-starter-kit.streamlit.app/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-jornal.streamlit.app/)
 
-## GitHub Codespaces
+## How it works
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/app-starter-kit?quickstart=1)
+Given a short story (3 lines), multiple LLM calls are made with the use of LangChain, Chain of Thought and internet search. These processes build a baseline article, refine it by checking factualness, style, adding real testimonies and then delivering back the news article to the user. After that, the objective is to start a conversation about how the AI Journalist could improve the article or apply any kind of style.
 
-## Section Heading
-
-This is filler text, please replace this with text for this section.
-
-## Further Reading
-
-This is filler text, please replace this with a explanatory text about further relevant resources for this repo
-- Resource 1
-- Resource 2
-- Resource 3
