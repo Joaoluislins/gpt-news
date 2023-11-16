@@ -169,7 +169,7 @@ class AIJournalist:
     # refines the article
     # returns the refined version
     # TODO abstract more
-    def refine_article_chain(self, baseline_article, statement_list, reviews_list):
+    def refine_article_chain(self, baseline_article:str, statement_list:str, reviews_list:list[str]):
 
         # Prompt constructor to first insert the baseline article and then incrementally insert a new statement+review and refine the baseline article
         document_prompt = PromptTemplate.from_template("{page_content}")
@@ -340,7 +340,7 @@ class AIJournalist:
         # processes -> build a baseline article out of the short story and identify its factual statements
         # outputs ->  article_and_statements_response = {'article', 'factual_statements'} - dict
         article_and_statements_response = self.generate_article_and_statements(text)
-        baseline_article, factual_statements = article_and_statements_response['article'], article_and_statements_response['factual_statements'].content
+        baseline_article, factual_statements = article_and_statements_response['article'].content, article_and_statements_response['factual_statements'].content
 
 
         # input -> baseline article, its factual statements - str
