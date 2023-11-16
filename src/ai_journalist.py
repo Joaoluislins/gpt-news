@@ -125,16 +125,21 @@ class AIJournalist:
         statement_checker = factual_checker_prompt | {'result': self.agent_react}
 
         # Use concurrent.futures to make parallel calls
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            # Create a list of futures for each statement
-            futures = [executor.submit(self.chain_invoke, statement_checker, {'article': article, 'statement': statement}) for statement in statement_list]
+        #     # Create a list of futures for each statement
+        #     futures = [executor.submit(self.chain_invoke, statement_checker, {'article': article, 'statement': statement}) for statement in statement_list]
 
-            # Wait for all futures to complete
-            concurrent.futures.wait(futures)
+        #     # Wait for all futures to complete
+        #     concurrent.futures.wait(futures)
 
-            # Get the results from completed futures
-            reviews_list = [future.result() for future in futures]
+        #     # Get the results from completed futures
+        #     reviews_list = [future.result() for future in futures]
+
+        reviews_list = []
+        for statement in statement_list:
+            reviews_list.append(statement_checker.invoke({'article': article, 'statement': statement}))  
+
 
         return reviews_list
 
