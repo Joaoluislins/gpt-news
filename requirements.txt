@@ -51,7 +51,7 @@ jsonschema==4.19.2
 jsonschema-specifications==2023.7.1
 jupyter_client==8.5.0
 jupyter_core==5.4.0
-langchain==0.0.327
+langchain>=0.0.329
 langchainhub==0.1.13
 langsmith==0.0.52
 lxml==4.9.3
@@ -78,7 +78,7 @@ protobuf==4.24.4
 psutil==5.9.6
 ptyprocess==0.7.0
 pure-eval==0.2.2
-pyarrow==14.0.0
+pyarrow>=14.0.1
 pyasn1==0.5.0
 pyasn1-modules==0.3.0
 pydantic==2.4.2
