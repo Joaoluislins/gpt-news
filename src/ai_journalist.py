@@ -254,7 +254,7 @@ class AIJournalist:
             Testimony 2:"""
         )
 
-        testimony_chain = {'article': RunnablePassthrough()} | real_testimonies_prompt | {"testimonies": self.agent_react}
+        testimony_chain = {'article': RunnablePassthrough()} | real_testimonies_prompt | self.agent_react
 
         return self.chain_invoke(testimony_chain, {"article": refined_article})
 
