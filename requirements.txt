@@ -121,4 +121,5 @@ validators==0.22.0
 wcwidth==0.2.8
 yarl==1.9.2
 zipp==3.17.0
-
+gcsfs
+st-files-connection

@@ -3,3 +3,5 @@ app_oop.py
 gpt_news.ipynb
 backup
 /tests
+.streamlit/secrets.toml
+date-user-input-output-log.parquet.gzip
