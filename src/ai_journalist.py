@@ -115,8 +115,11 @@ class AIJournalist:
     def statement_checker_chain(self, article, statement_list):
         factual_checker_prompt = PromptTemplate.from_template(
             """You are a factual checker for a digital newspaper. Given News Article and the Statement below, search on the internet and provide a very short review about the factualness of the statement. Use elements of the article to improve search results.
+            
             News Article: {article}
+            
             Statement: {statement}
+            
             Short Review:""")
 
         # processing the str numbered list into a list obj
@@ -137,7 +140,7 @@ class AIJournalist:
         #     reviews_list = [future.result() for future in futures]
 
         reviews_list = []
-        for statement in statement_list:
+        for statement in statement_list[-2:]:
             reviews_list.append(statement_checker.invoke({'article': article, 'statement': statement}))  
 
 
@@ -161,7 +164,7 @@ class AIJournalist:
 
 
         return self.chain_invoke(grammar_chain,
-                                 {"context": context},
+                                 context,
                                  config)
     
 
@@ -180,7 +183,9 @@ class AIJournalist:
         """Here's your baseline article: {prev_response}.
 
         Now refine the baseline article considering the factualness review of the below statement. If its factual, do not add anything, but if its not factual or inconclusive, take away just the statement from the News Article, adapting the remaining text.
-        {context}""")
+        {context}
+
+        Refined Article:""")
 
         # Refining chain
         refine_chain = (
@@ -240,6 +245,8 @@ class AIJournalist:
 
             News Article: {article}
 
+            If only 1 testimony is found, output it. If none, just output: no testimonies
+
             Person 1:
             Testimony 1:
 
@@ -267,7 +274,7 @@ class AIJournalist:
 
             Extracted testimonies: {testimonies}
 
-            If no testimonies could be found, please just output 'no found testimonies'
+            If no testimonies could be found, please just output 'no testimonies found'. But if only one testimony is found, output it.
             - Reviewed testimonies -
 
             Person 1:
@@ -354,40 +361,47 @@ class AIJournalist:
         # processes -> apply grammar check in the baseline article and refine it considering each statement's review
         # output -> refined article - dict
         refined_article = self.refine_article_chain(baseline_article, factual_statements, reviews_list)
-        refined_article = refined_article['article']
+        # refined_article = refined_article['article']
         
+
         # input -> refined article - str
         # processes -> search in the web for real testimonies about the discussed subject in the article
         # output -> testimonies_response = {"intermediate_steps", "testimonies"} - dict
-        testimonies = self.generate_testimonies(refined_article)
-        testimonies = testimonies['testimonies']
-        observations = testimonies['intermediate_steps']
+        testimonies_response = self.generate_testimonies(refined_article)
+        testimonies = testimonies_response['output']
+        full_observations = testimonies_response['intermediate_steps']
+
+        # retrieving onlt observation from intermediate steps
+        observations = ''
+        for i in full_observations:
+            observations += i[1] + '\n'
 
 
 
         # input -> refined article - str
         # processes -> search in the web for real testimonies about the discussed subject in the article
         # output -> refined article = {"refined_testimonies"} - dict
-        refined_testimonies = self.refine_testimonies(refined_article,
+        refined_testimonies_response = self.refine_testimonies(refined_article,
                                                       observations,
                                                       testimonies)
-        refined_testimonies = refined_testimonies['refined_testimonies']
+        refined_testimonies = refined_testimonies_response['refined_testimonies'].content
 
 
 
         # input -> refined_article, refined_testimonies - str
         # processes -> integrate the found testimonies into the refined article
         # output -> article wih testimonies = {"article_testimonies":} - dict
-        article_testimonies = self.integrate_testimonies(refined_article,
+        article_testimonies_response = self.integrate_testimonies(refined_article,
                                                          refined_testimonies)
-        article_testimonies = article_testimonies["article_testimonies"]
+        
+        article_testimonies = article_testimonies_response["article_testimonies"].content
 
 
         # input -> refined_article integrated with testimonies - str
         # processes -> edit the design to adapt for News, including sections, title..
         # output -> final formated article = {"article_testimonies":} - dict
-        formatted_article = self.format_article(article_testimonies)
-        formatted_article = formatted_article['formatted_article']
+        formatted_article_response = self.format_article(article_testimonies)
+        formatted_article = formatted_article_response['formatted_article'].content
 
 
         # Return the final response
