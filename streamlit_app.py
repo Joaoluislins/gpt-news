@@ -21,9 +21,10 @@ def main():
         serper_api_key = os.getenv('SERPER_API_KEY')
 
         if submitted:
-            ai_journalist = AIJournalist(openai_api_key, serper_api_key)
-            response = ai_journalist.generate_response(text)
-
+            # ai_journalist = AIJournalist(openai_api_key, serper_api_key)
+            # response = ai_journalist.generate_response(text)
+            
+            response = 'response'
 
             st.info(response)
             now = datetime.now()
