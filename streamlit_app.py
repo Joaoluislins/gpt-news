@@ -11,6 +11,7 @@ from datetime import datetime
 import pytz
 
 
+
 def main():
     st.title('🗞️ AI Journal')
     with st.form('my_form'):
@@ -28,7 +29,7 @@ def main():
 
             st.info(response)
             
-            now = datetime.now(tz=pytz.timezone('US/Eastern'))
+            now = datetime.now(tz=pytz.timezone('US/Eastern')).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
             # data to append db
             data_to_append = {
                             'datetime': f"{now}",
