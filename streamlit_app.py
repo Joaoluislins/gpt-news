@@ -25,8 +25,6 @@ def main():
             ai_journalist = AIJournalist(openai_api_key, serper_api_key)
             response = ai_journalist.generate_response(text)
 
-            response = 'response'
-
             st.info(response)
             
             now = datetime.now(tz=pytz.timezone('US/Eastern')).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
