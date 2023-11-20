@@ -5,7 +5,12 @@ import streamlit as st
 from src.ai_journalist import AIJournalist
 from src.db import DB
 from datetime import datetime
+
+
 import google.auth
+from google.oauth2 import service_account
+
+
 from google.cloud import storage
 import pandas as pd
 import os
@@ -41,13 +46,14 @@ def main():
             # df_updated = DB.write(df, data_to_append)
             # DB.update()
             # Retrieve the JSON key file path from Streamlit Secrets
-            key_path = st.secrets["[connections.gcs]"]
+
+            credentials = service_account.Credentials.from_service_account_info(st.secrets["connections.gcs"])
 
             # Set the environment variable to point to the key file
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+            # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
 
             # Authenticate using the key file
-            credentials, project_id = google.auth.default()
+            # credentials, project_id = google.auth.default()
 
             bucket_name = os.getenv('BUCKET_LOGS') 
             blob_name = os.getenv('FILE_LOGS') 
