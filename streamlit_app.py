@@ -36,9 +36,10 @@ def main():
                             # 'log': ''
                              }
 
-            df = DB.read()
-            df_updated = DB.write(df, data_to_append)
-            DB.update()
+            db = DB()
+            df = db.read()
+            df_updated = db.write(df, data_to_append)
+            db.update()
           
             # bucket_name = os.getenv('BUCKET_LOGS') 
             # blob_name = os.getenv('FILE_LOGS') 
