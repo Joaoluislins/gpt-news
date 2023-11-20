@@ -5,12 +5,6 @@ import streamlit as st
 from src.ai_journalist import AIJournalist
 from src.db import DB
 from datetime import datetime
-
-
-import google.auth
-from google.oauth2 import service_account
-
-
 from google.cloud import storage
 import pandas as pd
 import os
@@ -42,35 +36,26 @@ def main():
                             # 'log': ''
                              }
 
-            # df = DB.read()
-            # df_updated = DB.write(df, data_to_append)
-            # DB.update()
-            # Retrieve the JSON key file path from Streamlit Secrets
+            df = DB.read()
+            df_updated = DB.write(df, data_to_append)
+            DB.update()
+          
+            # bucket_name = os.getenv('BUCKET_LOGS') 
+            # blob_name = os.getenv('FILE_LOGS') 
+            # client = storage.Client(project='gpt-news', credentials = credentials)
+            # bucket = client.get_bucket(bucket_name)
 
-            credentials = service_account.Credentials.from_service_account_info(st.secrets.connections_gcs)
+            # blob = bucket.get_blob(blob_name)
+            # blob.download_to_filename(blob_name)
+            # df = pd.read_parquet(blob_name)
 
-            # Set the environment variable to point to the key file
-            # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+            # new_entry_df = pd.DataFrame([data_to_append])
+            # df_new = pd.concat([df,new_entry_df])
+            # df_new.reset_index(inplace=True, drop=True)     
+            # df_new.to_parquet(blob_name)
 
-            # Authenticate using the key file
-            # credentials, project_id = google.auth.default()
-
-            bucket_name = os.getenv('BUCKET_LOGS') 
-            blob_name = os.getenv('FILE_LOGS') 
-            client = storage.Client(project='gpt-news', credentials = credentials)
-            bucket = client.get_bucket(bucket_name)
-
-            blob = bucket.get_blob(blob_name)
-            blob.download_to_filename(blob_name)
-            df = pd.read_parquet(blob_name)
-
-            new_entry_df = pd.DataFrame([data_to_append])
-            df_new = pd.concat([df,new_entry_df])
-            df_new.reset_index(inplace=True, drop=True)     
-            df_new.to_parquet(blob_name)
-
-            blob = bucket.get_blob(blob_name)         
-            blob.upload_from_filename(blob_name)
+            # blob = bucket.get_blob(blob_name)         
+            # blob.upload_from_filename(blob_name)
 
 
          

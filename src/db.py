@@ -1,6 +1,8 @@
 from google.cloud import storage
 import pandas as pd
 import os
+from google.oauth2 import service_account
+import streamlit as st
 
 
 
@@ -8,8 +10,9 @@ class DB:
     def __init__(self):
         self.bucket_name = os.getenv('BUCKET_LOGS') 
         self.blob_name = os.getenv('FILE_LOGS') 
-        self.client = storage.Client(project='gpt-news')
+        self.client = storage.Client(project='gpt-news', credentials=self.credentials)
         self.bucket = self.client.get_bucket(self.bucket_name)
+        self.credentials = service_account.Credentials.from_service_account_info(st.secrets.connections_gcs)
         
 
     def read(self):
