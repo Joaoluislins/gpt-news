@@ -41,7 +41,7 @@ def main():
             # df_updated = DB.write(df, data_to_append)
             # DB.update()
             # Retrieve the JSON key file path from Streamlit Secrets
-            key_path = st.secrets["connections.gcs"]
+            key_path = st.secrets["[connections.gcs]"]
 
             # Set the environment variable to point to the key file
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
@@ -51,8 +51,8 @@ def main():
 
             bucket_name = os.getenv('BUCKET_LOGS') 
             blob_name = os.getenv('FILE_LOGS') 
-            client = storage.Client(project='gpt-news')
-            bucket = client.get_bucket(bucket_name, credentials)
+            client = storage.Client(project='gpt-news', credentials = credentials)
+            bucket = client.get_bucket(bucket_name)
 
             blob = bucket.get_blob(blob_name)
             blob.download_to_filename(blob_name)
