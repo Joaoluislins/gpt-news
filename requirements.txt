@@ -124,3 +124,4 @@ zipp==3.17.0
 gcsfs
 st-files-connection
 google-cloud-storage
+google-auth

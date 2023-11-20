@@ -5,7 +5,7 @@ import streamlit as st
 from src.ai_journalist import AIJournalist
 from src.db import DB
 from datetime import datetime
-
+import google.auth
 from google.cloud import storage
 import pandas as pd
 import os
@@ -23,7 +23,7 @@ def main():
         if submitted:
             # ai_journalist = AIJournalist(openai_api_key, serper_api_key)
             # response = ai_journalist.generate_response(text)
-            
+
             response = 'response'
 
             st.info(response)
@@ -40,11 +40,19 @@ def main():
             # df = DB.read()
             # df_updated = DB.write(df, data_to_append)
             # DB.update()
+            # Retrieve the JSON key file path from Streamlit Secrets
+            key_path = st.secrets["connections.gcs"]
+
+            # Set the environment variable to point to the key file
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
+
+            # Authenticate using the key file
+            credentials, project_id = google.auth.default()
 
             bucket_name = os.getenv('BUCKET_LOGS') 
             blob_name = os.getenv('FILE_LOGS') 
             client = storage.Client(project='gpt-news')
-            bucket = client.get_bucket(bucket_name)
+            bucket = client.get_bucket(bucket_name, credentials)
 
             blob = bucket.get_blob(blob_name)
             blob.download_to_filename(blob_name)
