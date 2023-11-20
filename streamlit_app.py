@@ -47,7 +47,7 @@ def main():
             # DB.update()
             # Retrieve the JSON key file path from Streamlit Secrets
 
-            credentials = service_account.Credentials.from_service_account_info(st.secrets["connections_gcs"])
+            credentials = service_account.Credentials.from_service_account_info(st.secrets.connections_gcs)
 
             # Set the environment variable to point to the key file
             # os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = key_path
