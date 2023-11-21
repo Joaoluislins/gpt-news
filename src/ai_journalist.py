@@ -26,9 +26,7 @@ class AIJournalist:
         self.openai_api_key = openai_api_key
         self.serper_api_key = serper_api_key
 
-        # LLM that is going to be used
-        self.llm = ChatOpenAI(temperature=0.2, model="gpt-4", openai_api_key = self.openai_api_key)
-
+        
         # Search engine
         self.search = GoogleSerperAPIWrapper()
         # Tools to equip the LLM with
@@ -40,10 +38,14 @@ class AIJournalist:
                             ),
                     ]
         
-        # Langchain React Agent = LLM + tools + React
-        self.agent_react = initialize_agent(self.tools, self.llm, agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, return_intermediate_steps=True)
+    # Langchain React Agent = LLM + tools + React
+    def agent_api(self, model):
+        return initialize_agent(self.tools, self.llm_api(model), agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION, verbose=True, return_intermediate_steps=True, handle_parsing_errors=True)
 
-        
+    # LLM that is going to be used
+    def llm_api(self, model):
+        return ChatOpenAI(temperature=0.2, model=model, openai_api_key = self.openai_api_key)
+
     def set_openai_key(self):
         openai.api_key = self.openai_api_key
 
@@ -72,7 +74,7 @@ class AIJournalist:
             Short Story:"""
         )
 
-        chain = {"theme": RunnablePassthrough()} | short_story_prompt | self.llm | {"story": RunnablePassthrough()}
+        chain = short_story_prompt | self.llm_api('gpt-3.5-turbo-1106') 
 
         return self.chain_invoke(chain, {"theme": theme})
 
@@ -84,7 +86,7 @@ class AIJournalist:
 
         # Prompt to generate a baseline article about the short story provided
         article_prompt = PromptTemplate.from_template(
-            """You are a Journalist of a digital newspaper. Given the short factual story, it is your job to write an engaging and factual news article about this story.
+            """You are a Journalist of a digital newspaper. Given the Short Story, it is your job to write a long, engaging and factual news article about this story. First search the internet for content related to the Short Story, then write the long article based on the search results.
 
             Short Story: {story}
             News article:"""
@@ -99,9 +101,9 @@ class AIJournalist:
         )
 
         # Subchain for article
-        article_provider = article_prompt | self.llm | {"article": RunnablePassthrough()}
+        article_provider = article_prompt | self.agent_api('gpt-4')| {"article": RunnablePassthrough()}
         # Subchain for factual statements
-        factual_statements_provider = factual_id_prompt | self.llm 
+        factual_statements_provider = factual_id_prompt | self.llm_api('gpt-3.5-turbo-1106')
 
         # Joining in a big chain
         chain = article_provider | {'article': itemgetter('article'), 'factual_statements': factual_statements_provider}
@@ -125,7 +127,7 @@ class AIJournalist:
         # processing the str numbered list into a list obj
         statement_list = self.list_out_of_num_list(statement_list)
 
-        statement_checker = factual_checker_prompt | {'result': self.agent_react}
+        statement_checker = factual_checker_prompt | self.agent_api('gpt-3.5-turbo-1106')
 
         # Use concurrent.futures to make parallel calls
         # with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -140,7 +142,7 @@ class AIJournalist:
         #     reviews_list = [future.result() for future in futures]
 
         reviews_list = []
-        for statement in statement_list[-2:]:
+        for statement in statement_list:
             reviews_list.append(statement_checker.invoke({'article': article, 'statement': statement}))  
 
 
@@ -160,7 +162,7 @@ class AIJournalist:
         partial_format_doc = partial(format_document, prompt=document_prompt)
 
         # Grammar chain
-        grammar_chain = {"context": partial_format_doc} | grammar_prompt | self.llm | StrOutputParser()
+        grammar_chain = {"context": partial_format_doc} | grammar_prompt | self.llm_api('gpt-3.5-turbo-1106') | StrOutputParser()
 
 
         return self.chain_invoke(grammar_chain,
@@ -194,7 +196,7 @@ class AIJournalist:
             "context": lambda x: partial_format_doc(x["doc"]),
         }
         | refine_prompt
-        | self.llm
+        | self.llm_api('gpt-3.5-turbo-1106')
         | StrOutputParser()
         )
 
@@ -218,7 +220,7 @@ class AIJournalist:
         # Building the list that is going to be iterated by the refine_loop function,
         # the first element is the baseline article itself to be used by the grammar chain,
         # then each instance of statement+review
-        statement_and_check = ['Statement: ' + statement + '\n' + 'Review: ' + review['result']['output']
+        statement_and_check = ['Statement: ' + statement + '\n' + 'Review: ' + review['output']
                                 for statement, review in zip(statement_list, reviews_list)]
 
         # Inserting baseline article as first doc
@@ -254,7 +256,7 @@ class AIJournalist:
             Testimony 2:"""
         )
 
-        testimony_chain = {'article': RunnablePassthrough()} | real_testimonies_prompt | self.agent_react
+        testimony_chain = real_testimonies_prompt | self.agent_api('gpt-3.5-turbo-1106')
 
         return self.chain_invoke(testimony_chain, {"article": refined_article})
 
@@ -283,7 +285,7 @@ class AIJournalist:
             Person 2:
             Testimony 2:"""
         )
-        refine_testimonies_chain = refine_testimonies_prompt | {"refined_testimonies": self.llm} 
+        refine_testimonies_chain = refine_testimonies_prompt | {"refined_testimonies": self.llm_api('gpt-3.5-turbo')} 
         return self.chain_invoke(refine_testimonies_chain,
                                  {"article": refined_article,
                                   "observations": observations,
@@ -305,7 +307,7 @@ class AIJournalist:
             Combined News Article:"""
         )
 
-        integrate_testimonies_chain = integrate_testimonies_prompt | {"article_testimonies": self.llm}
+        integrate_testimonies_chain = integrate_testimonies_prompt | {"article_testimonies": self.llm_api('gpt-4')}
 
         return self.chain_invoke(integrate_testimonies_chain,
                                  {"article": refined_article,
@@ -324,7 +326,7 @@ class AIJournalist:
             Formatted News Article:"""
         )
 
-        format_design_chain = format_prompt | {'formatted_article': self.llm}
+        format_design_chain = format_prompt | {'formatted_article': self.llm_api('gpt-3.5-turbo-1106')}
         return self.chain_invoke(format_design_chain,
                                  {"combined_article": combined_article_testimonies})
 
@@ -347,7 +349,7 @@ class AIJournalist:
         # processes -> build a baseline article out of the short story and identify its factual statements
         # outputs ->  article_and_statements_response = {'article', 'factual_statements'} - dict
         article_and_statements_response = self.generate_article_and_statements(text)
-        baseline_article, factual_statements = article_and_statements_response['article'].content, article_and_statements_response['factual_statements'].content
+        baseline_article, factual_statements = article_and_statements_response['article']['output'], article_and_statements_response['factual_statements'].content
 
 
         # input -> baseline article, its factual statements - str

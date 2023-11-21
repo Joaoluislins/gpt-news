@@ -1,14 +1,13 @@
 import os
-from dotenv import load_dotenv
-load_dotenv()
 import streamlit as st
 from src.ai_journalist import AIJournalist
 from src.db import DB
 from datetime import datetime
-import pandas as pd
 import os
 from datetime import datetime
 import pytz
+from dotenv import load_dotenv
+load_dotenv()
 
 
 
@@ -28,6 +27,7 @@ def main():
             st.info(response)
             
             now = datetime.now(tz=pytz.timezone('US/Eastern')).strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+            
             # data to append db
             data_to_append = {
                             'datetime': f"{now}",
