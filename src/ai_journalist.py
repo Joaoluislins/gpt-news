@@ -2,7 +2,6 @@
 # parallel calls
 # abstract a little bit more the generate response function
 # apply modular calls to extend the article with given features by the user
-# apply conditions on testimonies
 # chatbased
 
 import os
@@ -97,7 +96,7 @@ class AIJournalist:
 
         # Prompt to generate a baseline article about the short story provided
         article_prompt_2 = PromptTemplate.from_template(
-            """You are a Journalist of a digital newspaper. Given the Initial Article, it is your job to extend it. Write a long, engaging and factual news article about this story. First search the internet for related content, then extend the long article based on the search results.
+            """You are a Journalist of a digital newspaper. Given the Initial Article, it is your job to extend it. Write an extremely long, engaging and factual news article about this story. First search the internet for related content, then greatly extend the long article based on the search results.
 
             Initial Article: {article}
             Long News article:"""
