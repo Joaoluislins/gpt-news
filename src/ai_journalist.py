@@ -95,21 +95,36 @@ class AIJournalist:
             News article:"""
         )
 
+        # Prompt to generate a baseline article about the short story provided
+        article_prompt_2 = PromptTemplate.from_template(
+            """You are a Journalist of a digital newspaper. Given the Initial Article, it is your job to extend it. Write a long, engaging and factual news article about this story. First search the internet for related content, then extend the long article based on the search results.
+
+            Initial Article: {article}
+            Long News article:"""
+        )
+
         # Prompt to identify the factual statements contained within the generated baseline article
         factual_id_prompt = PromptTemplate.from_template(
             """You are a factual checker critic for a digital newspaper. Given the News Article, it is your job to identify the factual statements written in the article. Only if necessary, you can slightly rewrite a factual statement to include relevant information contained in the rest of the article in order to achieve a comprehensive and independent phrase.
 
-            News Article: {article}
+            News Article: {article_extended}
             Factual Statements:"""
         )
 
+        
         # Subchain for article
         article_provider = article_prompt | self.agent_api('gpt-4')| {"article": RunnablePassthrough()}
+        # Extending the initial article
+        article_provider_2 = article_prompt_2 | self.agent_api('gpt-4')
         # Subchain for factual statements
         factual_statements_provider = factual_id_prompt | self.llm_api('gpt-3.5-turbo-1106')
+        
 
         # Joining in a big chain
-        chain = article_provider | {'article': itemgetter('article'), 'factual_statements': factual_statements_provider}
+        chain = (
+                article_provider
+                | {'article': itemgetter('article'), 'article_extended': article_provider_2} 
+                | {'article_extended': itemgetter('article_extended'), 'factual_statements': factual_statements_provider})
 
         return self.chain_invoke(chain, {"story": story})
     
@@ -352,7 +367,7 @@ class AIJournalist:
         # processes -> build a baseline article out of the short story and identify its factual statements
         # outputs ->  article_and_statements_response = {'article', 'factual_statements'} - dict
         article_and_statements_response = self.generate_article_and_statements(text)
-        baseline_article, factual_statements = article_and_statements_response['article']['output'], article_and_statements_response['factual_statements'].content
+        baseline_article, factual_statements = article_and_statements_response['article_extended']['output'], article_and_statements_response['factual_statements'].content
 
 
         # input -> baseline article, its factual statements - str
@@ -384,7 +399,7 @@ class AIJournalist:
         
         if testimonies == 'no testimonies':
             article_testimonies = refined_article
-            
+
         else:
 
             # input -> refined article - str
