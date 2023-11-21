@@ -1,6 +1,9 @@
 ### TO DO
 # parallel calls
-# abstract a little bit more the generate response
+# abstract a little bit more the generate response function
+# apply modular calls to extend the article with given features by the user
+# apply conditions on testimonies
+# chatbased
 
 import os
 import openai
@@ -378,25 +381,28 @@ class AIJournalist:
         for i in full_observations:
             observations += i[1] + '\n'
 
-
-
-        # input -> refined article - str
-        # processes -> search in the web for real testimonies about the discussed subject in the article
-        # output -> refined article = {"refined_testimonies"} - dict
-        refined_testimonies_response = self.refine_testimonies(refined_article,
-                                                      observations,
-                                                      testimonies)
-        refined_testimonies = refined_testimonies_response['refined_testimonies'].content
-
-
-
-        # input -> refined_article, refined_testimonies - str
-        # processes -> integrate the found testimonies into the refined article
-        # output -> article wih testimonies = {"article_testimonies":} - dict
-        article_testimonies_response = self.integrate_testimonies(refined_article,
-                                                         refined_testimonies)
         
-        article_testimonies = article_testimonies_response["article_testimonies"].content
+        if testimonies == 'no testimonies':
+            article_testimonies = refined_article
+            
+        else:
+
+            # input -> refined article - str
+            # processes -> search in the web for real testimonies about the discussed subject in the article
+            # output -> refined article = {"refined_testimonies"} - dict
+            refined_testimonies_response = self.refine_testimonies(refined_article,
+                                                          observations,
+                                                          testimonies)
+            refined_testimonies = refined_testimonies_response['refined_testimonies'].content
+
+
+            # input -> refined_article, refined_testimonies - str
+            # processes -> integrate the found testimonies into the refined article
+            # output -> article wih testimonies = {"article_testimonies":} - dict
+            article_testimonies_response = self.integrate_testimonies(refined_article,
+                                                             refined_testimonies)
+
+            article_testimonies = article_testimonies_response["article_testimonies"].content
 
 
         # input -> refined_article integrated with testimonies - str
